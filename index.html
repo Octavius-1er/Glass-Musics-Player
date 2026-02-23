@@ -373,13 +373,45 @@
             <div class="progress" id="progress"></div>
         </div>
         <div class="controls">
-            <button id="repeatBtn"    class="control-btn small ghost" style="opacity:0.5">🔁</button>
-            <button id="prevBtn"      class="control-btn ghost">⏮</button>
-            <button id="playPauseBtn" class="control-btn big">▶</button>
-            <button id="nextBtn"      class="control-btn ghost">⏭</button>
-            <button id="likeBtn"      class="control-btn small ghost">♡</button>
+            <!-- Repeat -->
+            <button id="repeatBtn" class="control-btn small ghost" style="opacity:0.5" title="Repeat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                </svg>
+            </button>
+            <!-- Prev -->
+            <button id="prevBtn" class="control-btn ghost" title="Previous">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                    <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+                </svg>
+            </button>
+            <!-- Play/Pause -->
+            <button id="playPauseBtn" class="control-btn big" title="Play/Pause">
+                <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style="display:none">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+            <!-- Next -->
+            <button id="nextBtn" class="control-btn ghost" title="Next">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                    <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
+                </svg>
+            </button>
+            <!-- Like -->
+            <button id="likeBtn" class="control-btn small ghost" title="Like">
+                <svg id="iconHeart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </button>
         </div>
-        <div class="volume-row">🔇 <input type="range" id="volumeSlider" min="0" max="100" value="100"> 🔊</div>
+        <div class="volume-row">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="opacity:0.6;flex-shrink:0"><path d="M18.5 12A4.5 4.5 0 0 0 16 7.97V16c1.48-.73 2.5-2.25 2.5-4zm-13-1v2c0 .55.45 1 1 1h3l3.5 3.5c.63.63 1.7.18 1.7-.71V7.21c0-.89-1.08-1.34-1.71-.71L9.5 10H6.5c-.55 0-1 .45-1 1z"/></svg>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" style="opacity:0.6;flex-shrink:0"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4zm-2.5-7.07v2.08a5 5 0 0 1 0 9.98v2.08A7 7 0 0 0 14 5.07v-.14z"/></svg>
+        </div>
     </div>
 </div>
 
@@ -396,14 +428,26 @@
         <div class="mini-title"  id="miniTitle">—</div>
         <div class="mini-artist" id="miniArtist">—</div>
     </div>
-    <button class="mini-play" id="miniPlay">▶</button>
+    <button class="mini-play" id="miniPlay">
+        <svg id="miniIconPlay" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="miniIconPause" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
     <div class="mini-prog-bar" id="miniProgress"></div>
 </div>
 
 <nav class="bottom-nav">
-    <button class="nav-btn active" data-view="view-songs"  onclick="switchTab(this)">🎵<span>Songs</span></button>
-    <button class="nav-btn"        data-view="view-player" onclick="switchTab(this)">▶<span>Player</span></button>
-    <button class="nav-btn"        data-view="view-genres" onclick="switchTab(this)">🎭<span>Genres</span></button>
+    <button class="nav-btn active" data-view="view-songs" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        <span>Songs</span>
+    </button>
+    <button class="nav-btn" data-view="view-player" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M8 5v14l11-7z"/></svg>
+        <span>Player</span>
+    </button>
+    <button class="nav-btn" data-view="view-genres" onclick="switchTab(this)">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+        <span>Genres</span>
+    </button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -801,12 +845,25 @@ function initUI(index) {
 
 function updateLikeBtn(f) {
     const liked = isLiked(f);
-    likeBtn.innerText = liked ? "❤" : "♡";
-    likeBtn.classList.toggle("liked", liked);
+    const svg = likeBtn.querySelector("svg");
+    if(liked) {
+        svg.setAttribute("fill", "#ff4d4d");
+        svg.setAttribute("stroke", "#ff4d4d");
+        likeBtn.classList.add("liked");
+    } else {
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("stroke", "currentColor");
+        likeBtn.classList.remove("liked");
+    }
 }
 
 function setPlayingUI(playing) {
-    playPauseBtn.innerText = miniPlay.innerText = playing ? "⏸" : "▶";
+    // Main play/pause icons
+    document.getElementById("iconPlay").style.display  = playing ? "none" : "block";
+    document.getElementById("iconPause").style.display = playing ? "block" : "none";
+    // Mini player icons
+    document.getElementById("miniIconPlay").style.display  = playing ? "none" : "block";
+    document.getElementById("miniIconPause").style.display = playing ? "block" : "none";
     playPauseBtn.classList.toggle("glow", playing);
     coverImg.classList.toggle("playing", playing);
     if(!playing) playPauseBtn.style.boxShadow = "";
@@ -858,7 +915,20 @@ miniPlayer.onclick = () => goToPlayer();
 repeatBtn.onclick = () => {
     repeatMode = (repeatMode+1)%3;
     repeatBtn.style.opacity = repeatMode===0 ? 0.5 : 1;
-    repeatBtn.innerText = repeatMode===2 ? "🔂" : "🔁";
+    // repeat-one: show a "1" badge on the icon
+    const svg = repeatBtn.querySelector("svg");
+    if(repeatMode === 2) {
+        repeatBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+            <text x="10" y="14" font-size="7" fill="currentColor" stroke="none" font-weight="bold" text-anchor="middle">1</text>
+        </svg>`;
+    } else {
+        repeatBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>`;
+    }
 };
 
 likeBtn.onclick = () => {
