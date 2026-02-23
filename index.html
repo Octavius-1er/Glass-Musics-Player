@@ -194,12 +194,12 @@
         #date   { font-size: 13px; opacity: 0.5; margin-bottom: 16px; }
 
         .progress-container {
-            width: 100%; max-width: 380px; height: 6px;
-            background: rgba(255,255,255,0.2); border-radius: 5px;
-            margin: 0 auto 6px; cursor: pointer; position: relative; touch-action: none;
+            width: 100%; max-width: 380px;
+            margin: 0 auto 6px;
         }
-        .progress-container::before { content:''; position:absolute; inset:-12px 0; }
-        .progress { height:100%; width:0%; border-radius:5px; background:var(--accent); pointer-events:none; }
+        #progressBar {
+            width: 100%; accent-color: var(--accent); cursor: pointer;
+        }
         .time-display { font-size:12px; opacity:0.6; margin-bottom:18px; }
 
         .controls { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; }
@@ -369,15 +369,16 @@
         <div id="artist"></div>
         <div id="date"></div>
         <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
-        <div class="progress-container" id="progressContainer">
-            <div class="progress" id="progress"></div>
+        <div class="progress-container">
+            <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1">
         </div>
         <div class="controls">
             <!-- Repeat -->
-            <button id="repeatBtn" class="control-btn small ghost" style="opacity:0.5" title="Repeat">
+            <button id="repeatBtn" class="control-btn small ghost" style="opacity:0.5;position:relative" title="Repeat">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
                     <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
                 </svg>
+                <span class="repeat-badge" style="display:none;position:absolute;top:3px;right:3px;font-size:9px;font-weight:800;background:var(--accent);color:white;border-radius:50%;width:13px;height:13px;align-items:center;justify-content:center;line-height:13px;text-align:center;">1</span>
             </button>
             <!-- Prev -->
             <button id="prevBtn" class="control-btn ghost" title="Previous">
@@ -667,7 +668,7 @@ function initProfiles() {
 //  PLAYER
 // ══════════════════════════════════════════════════
 let currentSongIndex = 0, currentGenre = "All", repeatMode = 0;
-let audioContext, analyser, source, dataArray, isSeeking = false;
+let audioContext, analyser, source, dataArray;
 
 const songs = [
     {name:"It's raining tacos!", artist:"Parry Gripp",   date:"2012", file:"song1.mp3", cover:"cover1.png", genre:"Roblox"},
@@ -682,8 +683,7 @@ const coverImg      = $("cover");
 const titleEl       = $("title");
 const artistEl      = $("artist");
 const dateEl        = $("date");
-const progressEl    = $("progress");
-const progressCont  = $("progressContainer");
+const progressBar    = $("progressBar");
 const timeDisplay   = $("timeDisplay");
 const volumeSlider  = $("volumeSlider");
 const songList      = $("songList");
@@ -881,24 +881,25 @@ function loadAndPlay(i) {
 function nextSong() { loadAndPlay((currentSongIndex+1)%songs.length); }
 function prevSong() { loadAndPlay((currentSongIndex-1+songs.length)%songs.length); }
 
-function seekTo(clientX) {
-    if(!audio.duration) return;
-    const rect = progressCont.getBoundingClientRect();
-    audio.currentTime = Math.max(0,Math.min(1,(clientX-rect.left)/rect.width))*audio.duration;
-}
-progressCont.addEventListener("click", e => seekTo(e.clientX));
-progressCont.addEventListener("touchstart", e => { isSeeking=true; seekTo(e.touches[0].clientX); }, {passive:true});
-document.addEventListener("touchmove",  e => { if(isSeeking) seekTo(e.touches[0].clientX); }, {passive:true});
-document.addEventListener("touchend",   () => isSeeking=false);
+progressBar.addEventListener("input", () => {
+    if(audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
+});
 
 audio.addEventListener("timeupdate", () => {
-    if(!audio.duration||isSeeking) return;
-    const pct = (audio.currentTime/audio.duration)*100;
-    progressEl.style.width = pct+"%";
-    miniProgress.style.width = pct+"%";
-    timeDisplay.innerText = formatTime(audio.currentTime)+" / "+formatTime(audio.duration);
+    if(!audio.duration || progressBar === document.activeElement) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = pct;
+    miniProgress.style.width = pct + "%";
+    timeDisplay.innerText = formatTime(audio.currentTime) + " / " + formatTime(audio.duration);
 });
-audio.addEventListener("ended",  () => repeatMode===2 ? (audio.currentTime=0,audio.play()) : nextSong());
+audio.addEventListener("ended", () => {
+    if(repeatMode === 1) {
+        audio.currentTime = 0;
+        audio.play();
+    } else {
+        nextSong();
+    }
+});
 audio.addEventListener("pause",  () => setPlayingUI(false));
 audio.addEventListener("play",   () => setPlayingUI(true));
 
@@ -913,22 +914,12 @@ miniPlay.onclick = e => {
 miniPlayer.onclick = () => goToPlayer();
 
 repeatBtn.onclick = () => {
-    repeatMode = (repeatMode+1)%3;
-    repeatBtn.style.opacity = repeatMode===0 ? 0.5 : 1;
-    // repeat-one: show a "1" badge on the icon
-    const svg = repeatBtn.querySelector("svg");
-    if(repeatMode === 2) {
-        repeatBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-            <text x="10" y="14" font-size="7" fill="currentColor" stroke="none" font-weight="bold" text-anchor="middle">1</text>
-        </svg>`;
-    } else {
-        repeatBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-        </svg>`;
-    }
+    repeatMode = (repeatMode + 1) % 2; // 0 = off, 1 = repeat one
+    repeatBtn.style.opacity = repeatMode === 0 ? 0.5 : 1;
+    repeatBtn.style.color   = repeatMode === 1 ? "var(--accent)" : "white";
+    const badge = repeatBtn.querySelector(".repeat-badge");
+    if(badge) badge.style.display = repeatMode === 1 ? "inline-flex" : "none";
+    showToast(repeatMode === 1 ? "🔂 Repeat ON" : "🔁 Repeat OFF");
 };
 
 likeBtn.onclick = () => {
