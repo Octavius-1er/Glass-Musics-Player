@@ -6,40 +6,178 @@
     <title>Ultimate Premium Player</title>
     <link rel="icon" href="data:,">
     <style>
-        :root {
-            --accent: #1db954;
-            --nav-h: 65px;
-        }
-
+        :root { --accent: #1db954; --nav-h: 65px; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            color: white;
-            background: #000;
-            height: 100dvh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            margin: 0; font-family: Arial, Helvetica, sans-serif;
+            color: white; background: #000;
+            height: 100dvh; overflow: hidden;
+            display: flex; flex-direction: column;
         }
 
         .bg-blur {
             position: fixed; inset: 0;
             background-size: cover; background-position: center;
             filter: blur(60px) brightness(0.45);
-            transform: scale(1.2);
-            transition: 0.6s ease;
-            z-index: -2;
+            transform: scale(1.2); transition: 0.6s ease; z-index: -2;
         }
-        .bg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: -1; }
+        .bg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: -1; }
 
-        /* VIEWS */
+        /* ══════════════════════════════════════
+           PROFILE SCREEN (Netflix style)
+        ══════════════════════════════════════ */
+        #profile-screen {
+            position: fixed; inset: 0; z-index: 500;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(30px);
+            padding: 30px 20px;
+            transition: opacity 0.4s, transform 0.4s;
+        }
+        #profile-screen.hidden {
+            opacity: 0; pointer-events: none; transform: scale(1.05);
+        }
+
+        .profile-screen-title {
+            font-size: clamp(22px, 6vw, 36px);
+            font-weight: 700; margin-bottom: 8px; text-align: center;
+        }
+        .profile-screen-sub {
+            font-size: 14px; opacity: 0.5; margin-bottom: 36px; text-align: center;
+        }
+
+        .profiles-grid {
+            display: flex; flex-wrap: wrap;
+            gap: 18px; justify-content: center;
+            max-width: 500px; margin-bottom: 30px;
+        }
+
+        .profile-card {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 10px; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-card:active { transform: scale(0.93); }
+
+        .profile-avatar {
+            width: 90px; height: 90px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 38px;
+            border: 3px solid transparent;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .profile-card:hover .profile-avatar,
+        .profile-card:focus .profile-avatar {
+            border-color: white;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .profile-name {
+            font-size: 14px; font-weight: 600;
+            opacity: 0.85; text-align: center;
+            max-width: 90px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .add-profile-card .profile-avatar {
+            background: rgba(255,255,255,0.08);
+            border: 2px dashed rgba(255,255,255,0.3);
+            font-size: 32px;
+        }
+
+        /* ── CREATE PROFILE FORM ── */
+        #create-profile-form {
+            display: none; flex-direction: column;
+            align-items: center; gap: 14px; width: 100%; max-width: 320px;
+        }
+        #create-profile-form.visible { display: flex; }
+
+        .form-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+
+        .emoji-picker {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            justify-content: center; max-width: 280px;
+        }
+        .emoji-option {
+            width: 48px; height: 48px; border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .emoji-option.selected { border-color: var(--accent); background: rgba(29,185,84,0.2); }
+        .emoji-option:active { transform: scale(0.9); }
+
+        .profile-input {
+            width: 100%; padding: 13px 18px; border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.15); outline: none;
+            font-size: 16px; color: white;
+            background: rgba(255,255,255,0.08);
+            transition: 0.3s; text-align: center;
+        }
+        .profile-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+
+        .btn-primary {
+            width: 100%; padding: 13px; border-radius: 50px;
+            border: none; font-size: 16px; font-weight: 700;
+            background: var(--accent); color: white; cursor: pointer;
+            transition: 0.2s; letter-spacing: 0.5px;
+        }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+
+        .btn-ghost {
+            background: none; border: none; color: rgba(255,255,255,0.5);
+            font-size: 14px; cursor: pointer; padding: 6px 12px;
+            transition: 0.2s;
+        }
+        .btn-ghost:hover { color: white; }
+
+        /* ── MANAGE PROFILES BTN ── */
+        .manage-btn {
+            font-size: 13px; opacity: 0.45; cursor: pointer;
+            padding: 8px 16px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: none; color: white; transition: 0.2s;
+        }
+        .manage-btn:hover { opacity: 0.8; }
+
+        /* ── DELETE OVERLAY on profile card ── */
+        .profile-card.manage-mode .profile-avatar::after {
+            content: "✕";
+            position: absolute; inset: 0;
+            background: rgba(200,0,0,0.7);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 700;
+        }
+        .profile-card.manage-mode .profile-avatar { position: relative; }
+
+        /* ══════════════════════════════════════
+           CURRENT USER BADGE (in player header)
+        ══════════════════════════════════════ */
+        .user-badge {
+            position: fixed; top: 14px; right: 14px;
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            padding: 6px 12px 6px 8px;
+            border-radius: 50px;
+            cursor: pointer; z-index: 200;
+            transition: 0.2s; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-badge:hover { background: rgba(255,255,255,0.18); }
+        .user-badge-emoji { font-size: 20px; }
+        .user-badge-name  { font-size: 13px; font-weight: 600; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* ══════════════════════════════════════
+           VIEWS
+        ══════════════════════════════════════ */
         .view { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
         .view.active { display: flex; flex-direction: column; }
 
-        /* PLAYER VIEW */
-        #view-player { align-items: center; justify-content: center; padding: 20px 20px calc(var(--nav-h) + 10px); }
+        #view-player { align-items: center; justify-content: center; padding: 60px 20px calc(var(--nav-h) + 10px); }
         .player-inner { text-align: center; width: 100%; max-width: 420px; }
 
         .cover {
@@ -79,14 +217,10 @@
         .control-btn.liked { color:#ff4d4d; text-shadow:0 0 10px rgba(255,77,77,0.6); }
         .control-btn:active { transform:scale(0.9); }
 
-        .volume-row {
-            display:flex; align-items:center; gap:10px;
-            margin:16px auto 0; width:100%; max-width:380px;
-        }
+        .volume-row { display:flex; align-items:center; gap:10px; margin:16px auto 0; width:100%; max-width:380px; }
         input[type=range] { flex:1; accent-color:var(--accent); cursor:pointer; }
 
-        /* SONGS VIEW */
-        #view-songs { padding: 16px 16px calc(var(--nav-h) + 60px); }
+        #view-songs { padding: 60px 16px calc(var(--nav-h) + 60px); }
 
         .search-container { position:relative; margin-bottom:16px; }
         .search-container input {
@@ -110,13 +244,9 @@
         .song-duration { font-size:12px; opacity:0.6; white-space:nowrap; margin-left:10px; }
         .sidebar-like  { color:#ff4d4d; font-size:12px; margin-left:5px; }
 
-        /* GENRES / LIKED VIEW */
-        #view-genres { padding: 16px 16px calc(var(--nav-h) + 10px); }
+        #view-genres { padding: 60px 16px calc(var(--nav-h) + 10px); }
 
-        .section-title {
-            font-size:11px; text-transform:uppercase; letter-spacing:1.5px;
-            opacity:0.45; margin:18px 0 10px;
-        }
+        .section-title { font-size:11px; text-transform:uppercase; letter-spacing:1.5px; opacity:0.45; margin:18px 0 10px; }
 
         .genre-chip {
             display:inline-block; padding:9px 18px; border-radius:50px;
@@ -134,11 +264,9 @@
         .liked-item .heart { color:#ff4d4d; font-size:16px; }
         .liked-empty { opacity:0.4; font-size:14px; margin-top:10px; }
 
-        /* BOTTOM NAV */
         .bottom-nav {
             position:fixed; bottom:0; left:0; right:0; height:var(--nav-h);
-            display:flex;
-            background:rgba(10,10,10,0.88); backdrop-filter:blur(30px);
+            display:flex; background:rgba(10,10,10,0.88); backdrop-filter:blur(30px);
             border-top:1px solid rgba(255,255,255,0.08); z-index:100;
         }
         .nav-btn {
@@ -150,7 +278,6 @@
         .nav-btn span { font-size:10px; }
         .nav-btn.active { opacity:1; color:var(--accent); }
 
-        /* MINI PLAYER */
         .mini-player {
             position:fixed; bottom:var(--nav-h); left:0; right:0;
             padding:10px 16px;
@@ -171,7 +298,6 @@
         }
         .mini-prog-bar { position:absolute; bottom:0; left:0; height:2px; background:var(--accent); transition:width 0.5s linear; }
 
-        /* TOAST */
         .toast {
             position:fixed; bottom:calc(var(--nav-h) + 70px); left:50%;
             transform:translateX(-50%) translateY(20px);
@@ -184,13 +310,13 @@
         }
         .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
-        /* DESKTOP: classic 3-column layout */
+        /* DESKTOP */
         @media (min-width: 700px) {
             body { flex-direction:row; }
             .view { display:flex !important; flex-direction:column; overflow-y:auto; }
-            #view-songs  { width:260px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.07); padding-bottom:20px; }
-            #view-player { flex:1; padding-bottom:20px; }
-            #view-genres { width:200px; flex-shrink:0; border-left:1px solid rgba(255,255,255,0.07); padding-bottom:20px; }
+            #view-songs  { width:260px; flex-shrink:0; border-right:1px solid rgba(255,255,255,0.07); padding: 70px 16px 20px; }
+            #view-player { flex:1; padding: 70px 20px 20px; }
+            #view-genres { width:200px; flex-shrink:0; border-left:1px solid rgba(255,255,255,0.07); padding: 70px 16px 20px; }
             .bottom-nav, .mini-player { display:none !important; }
         }
     </style>
@@ -200,7 +326,33 @@
 <div class="bg-blur" id="bgBlur"></div>
 <div class="bg-overlay"></div>
 
-<!-- SONGS TAB -->
+<!-- ══ PROFILE SCREEN ══ -->
+<div id="profile-screen">
+    <!-- Profile selector -->
+    <div id="profile-selector">
+        <div class="profile-screen-title">Who's listening?</div>
+        <div class="profile-screen-sub">Choose your profile</div>
+        <div class="profiles-grid" id="profilesGrid"></div>
+        <button class="manage-btn" id="manageBtn">Manage profiles</button>
+    </div>
+
+    <!-- Create profile form -->
+    <div id="create-profile-form">
+        <div class="form-title">New profile</div>
+        <div class="emoji-picker" id="emojiPicker"></div>
+        <input class="profile-input" id="profileNameInput" type="text" placeholder="Your name" maxlength="20" autocomplete="off">
+        <button class="btn-primary" id="createProfileBtn">Create profile</button>
+        <button class="btn-ghost" id="cancelCreateBtn">Cancel</button>
+    </div>
+</div>
+
+<!-- ══ USER BADGE ══ -->
+<div class="user-badge" id="userBadge" style="display:none" onclick="showProfileScreen()">
+    <span class="user-badge-emoji" id="badgeEmoji"></span>
+    <span class="user-badge-name"  id="badgeName"></span>
+</div>
+
+<!-- ══ APP ══ -->
 <div class="view active" id="view-songs">
     <div class="search-container">
         <span class="search-icon">🔍</span>
@@ -210,7 +362,6 @@
     <div id="songList"></div>
 </div>
 
-<!-- PLAYER TAB -->
 <div class="view" id="view-player">
     <div class="player-inner">
         <img id="cover" class="cover" src="" alt="Cover">
@@ -232,7 +383,6 @@
     </div>
 </div>
 
-<!-- GENRES / LIKED TAB -->
 <div class="view" id="view-genres">
     <div class="section-title">Genres</div>
     <div id="genreChips"></div>
@@ -240,7 +390,6 @@
     <div id="likedList"></div>
 </div>
 
-<!-- MINI PLAYER -->
 <div class="mini-player" id="miniPlayer">
     <img class="mini-cover" id="miniCover" src="" alt="">
     <div class="mini-info">
@@ -251,25 +400,228 @@
     <div class="mini-prog-bar" id="miniProgress"></div>
 </div>
 
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-    <button class="nav-btn active" data-view="view-songs"   onclick="switchTab(this)">🎵<span>Songs</span></button>
-    <button class="nav-btn"        data-view="view-player"  onclick="switchTab(this)">▶<span>Player</span></button>
-    <button class="nav-btn"        data-view="view-genres"  onclick="switchTab(this)">🎭<span>Genres</span></button>
+    <button class="nav-btn active" data-view="view-songs"  onclick="switchTab(this)">🎵<span>Songs</span></button>
+    <button class="nav-btn"        data-view="view-player" onclick="switchTab(this)">▶<span>Player</span></button>
+    <button class="nav-btn"        data-view="view-genres" onclick="switchTab(this)">🎭<span>Genres</span></button>
 </nav>
 
 <div class="toast" id="toast"></div>
 <audio id="audio"></audio>
 
 <script>
-// ── STORAGE ──────────────────────────────────────────────────────────
-const LIKES_KEY = "musicplayer_likes";
-const loadLikes = () => { try { return JSON.parse(localStorage.getItem(LIKES_KEY))||{}; } catch(e){return{};} };
-const saveLikes = l => localStorage.setItem(LIKES_KEY, JSON.stringify(l));
-const toggleLike = f => { const l=loadLikes(); l[f]=!l[f]; if(!l[f])delete l[f]; saveLikes(l); return !!l[f]; };
-const isLiked = f => !!loadLikes()[f];
+// ══════════════════════════════════════════════════
+//  PROFILE SYSTEM
+// ══════════════════════════════════════════════════
+const PROFILES_KEY = "musicplayer_profiles";
+const CURRENT_KEY  = "musicplayer_current";
 
-// ── DATA ─────────────────────────────────────────────────────────────
+const AVATARS = ["🎵","🎸","🎹","🎺","🎻","🥁","🎤","🦄","🐱","🐶","🦊","🐼","🌙","⭐","🔥","💎","🌈","🍕","🎮","👾"];
+const BG_COLORS = ["#1a1a2e","#16213e","#0f3460","#1b1b2f","#2d132c","#1a0a00","#0d1b2a","#1c2826"];
+
+function getProfiles() { try { return JSON.parse(localStorage.getItem(PROFILES_KEY)) || []; } catch(e) { return []; } }
+function saveProfiles(p) { localStorage.setItem(PROFILES_KEY, JSON.stringify(p)); }
+function getCurrentId() { return localStorage.getItem(CURRENT_KEY) || null; }
+function setCurrentId(id) { localStorage.setItem(CURRENT_KEY, id); }
+
+function getCurrentProfile() {
+    const id = getCurrentId();
+    return getProfiles().find(p => p.id === id) || null;
+}
+
+// Per-profile likes
+function likesKey(profileId) { return `likes_${profileId}`; }
+function loadLikes() {
+    const p = getCurrentProfile();
+    if(!p) return {};
+    try { return JSON.parse(localStorage.getItem(likesKey(p.id))) || {}; } catch(e) { return {}; }
+}
+function saveLikes(l) {
+    const p = getCurrentProfile();
+    if(!p) return;
+    localStorage.setItem(likesKey(p.id), JSON.stringify(l));
+}
+const toggleLike = f => { const l=loadLikes(); l[f]=!l[f]; if(!l[f])delete l[f]; saveLikes(l); return !!l[f]; };
+const isLiked    = f => !!loadLikes()[f];
+
+// ── Profile screen UI ─────────────────────────────
+let manageMode = false;
+let selectedEmoji = AVATARS[0];
+
+const profileScreen   = document.getElementById("profile-screen");
+const profileSelector = document.getElementById("profile-selector");
+const createForm      = document.getElementById("create-profile-form");
+const profilesGrid    = document.getElementById("profilesGrid");
+const emojiPicker     = document.getElementById("emojiPicker");
+const profileNameInput= document.getElementById("profileNameInput");
+const userBadge       = document.getElementById("userBadge");
+const badgeEmoji      = document.getElementById("badgeEmoji");
+const badgeName       = document.getElementById("badgeName");
+const manageBtn       = document.getElementById("manageBtn");
+
+function showProfileScreen() {
+    manageMode = false;
+    profileScreen.classList.remove("hidden");
+    showSelector();
+}
+
+function hideProfileScreen() {
+    profileScreen.classList.add("hidden");
+}
+
+function showSelector() {
+    profileSelector.style.display = "flex";
+    profileSelector.style.flexDirection = "column";
+    profileSelector.style.alignItems = "center";
+    createForm.classList.remove("visible");
+    renderProfiles();
+}
+
+function showCreateForm() {
+    profileSelector.style.display = "none";
+    createForm.classList.add("visible");
+    profileNameInput.value = "";
+    renderEmojiPicker();
+}
+
+function renderEmojiPicker() {
+    emojiPicker.innerHTML = "";
+    AVATARS.forEach(e => {
+        const div = document.createElement("div");
+        div.classList.add("emoji-option");
+        if(e === selectedEmoji) div.classList.add("selected");
+        div.innerText = e;
+        div.onclick = () => {
+            selectedEmoji = e;
+            document.querySelectorAll(".emoji-option").forEach(el => el.classList.remove("selected"));
+            div.classList.add("selected");
+        };
+        emojiPicker.appendChild(div);
+    });
+}
+
+function renderProfiles() {
+    profilesGrid.innerHTML = "";
+    const profiles = getProfiles();
+
+    profiles.forEach(profile => {
+        const card = document.createElement("div");
+        card.classList.add("profile-card");
+        if(manageMode) card.classList.add("manage-mode");
+
+        const avatar = document.createElement("div");
+        avatar.classList.add("profile-avatar");
+        avatar.style.background = profile.color;
+        avatar.innerText = profile.emoji;
+
+        const name = document.createElement("div");
+        name.classList.add("profile-name");
+        name.innerText = profile.name;
+
+        card.appendChild(avatar);
+        card.appendChild(name);
+
+        if(manageMode) {
+            card.onclick = () => {
+                if(confirm(`Delete "${profile.name}"?`)) {
+                    let profiles = getProfiles();
+                    profiles = profiles.filter(p => p.id !== profile.id);
+                    saveProfiles(profiles);
+                    localStorage.removeItem(likesKey(profile.id));
+                    if(getCurrentId() === profile.id) {
+                        localStorage.removeItem(CURRENT_KEY);
+                    }
+                    renderProfiles();
+                }
+            };
+        } else {
+            card.onclick = () => selectProfile(profile.id);
+        }
+
+        profilesGrid.appendChild(card);
+    });
+
+    // Add profile card
+    if(!manageMode) {
+        const addCard = document.createElement("div");
+        addCard.classList.add("profile-card", "add-profile-card");
+        addCard.innerHTML = `<div class="profile-avatar">＋</div><div class="profile-name">Add profile</div>`;
+        addCard.onclick = showCreateForm;
+        profilesGrid.appendChild(addCard);
+    }
+
+    // Update manage button
+    manageBtn.style.display = profiles.length > 0 ? "block" : "none";
+    manageBtn.innerText = manageMode ? "Done" : "Manage profiles";
+}
+
+function selectProfile(id) {
+    setCurrentId(id);
+    const profile = getProfiles().find(p => p.id === id);
+    badgeEmoji.innerText = profile.emoji;
+    badgeName.innerText  = profile.name;
+    userBadge.style.display = "flex";
+    hideProfileScreen();
+    displaySongs();
+    displayGenres();
+    if(currentSongIndex !== null) updateLikeBtn(songs[currentSongIndex].file);
+}
+
+document.getElementById("createProfileBtn").onclick = () => {
+    const name = profileNameInput.value.trim();
+    if(!name) { profileNameInput.focus(); return; }
+    const profiles = getProfiles();
+    const newProfile = {
+        id: Date.now().toString(),
+        name,
+        emoji: selectedEmoji,
+        color: BG_COLORS[profiles.length % BG_COLORS.length]
+    };
+    profiles.push(newProfile);
+    saveProfiles(profiles);
+    selectProfile(newProfile.id);
+};
+
+document.getElementById("cancelCreateBtn").onclick = () => {
+    if(getProfiles().length === 0) return; // must create one
+    showSelector();
+};
+
+manageBtn.onclick = () => {
+    manageMode = !manageMode;
+    renderProfiles();
+};
+
+profileNameInput.addEventListener("keydown", e => {
+    if(e.key === "Enter") document.getElementById("createProfileBtn").onclick();
+});
+
+// Auto-show profile screen or resume session
+function initProfiles() {
+    const profiles = getProfiles();
+    const currentId = getCurrentId();
+
+    if(profiles.length === 0) {
+        // No profiles → show create form directly
+        profileSelector.style.display = "none";
+        createForm.classList.add("visible");
+        manageBtn.style.display = "none";
+        renderEmojiPicker();
+        document.getElementById("cancelCreateBtn").style.display = "none";
+        profileScreen.classList.remove("hidden");
+    } else if(currentId && profiles.find(p => p.id === currentId)) {
+        // Resume last session
+        selectProfile(currentId);
+        hideProfileScreen();
+    } else {
+        // Show selector
+        showSelector();
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  PLAYER
+// ══════════════════════════════════════════════════
 let currentSongIndex = 0, currentGenre = "All", repeatMode = 0;
 let audioContext, analyser, source, dataArray, isSeeking = false;
 
@@ -280,8 +632,7 @@ const songs = [
 ];
 const genreThemes = { "All":"#1db954", "Roblox":"#2a5298", "English":"#e10600" };
 
-// ── DOM ──────────────────────────────────────────────────────────────
-const $  = id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 const audio         = $("audio");
 const coverImg      = $("cover");
 const titleEl       = $("title");
@@ -310,7 +661,6 @@ const genreChips    = $("genreChips");
 const likedList     = $("likedList");
 const likedTitle    = $("likedTitle");
 
-// ── TABS ─────────────────────────────────────────────────────────────
 function switchTab(btn) {
     document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
@@ -318,12 +668,8 @@ function switchTab(btn) {
     $(btn.dataset.view).classList.add("active");
     miniPlayer.classList.toggle("visible", btn.dataset.view !== "view-player");
 }
-function goToPlayer() {
-    const btn = document.querySelector('[data-view="view-player"]');
-    switchTab(btn);
-}
+function goToPlayer() { switchTab(document.querySelector('[data-view="view-player"]')); }
 
-// ── TOAST ─────────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg) {
     toastEl.innerText = msg;
@@ -332,7 +678,6 @@ function showToast(msg) {
     toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────
 function formatTime(t) {
     if(!t||isNaN(t)) return "0:00";
     return Math.floor(t/60)+":"+Math.floor(t%60).toString().padStart(2,"0");
@@ -342,12 +687,11 @@ function getDuration(song, cb) {
     tmp.addEventListener("loadedmetadata", () => cb(formatTime(tmp.duration)));
 }
 
-// ── RENDER SONGS ─────────────────────────────────────────────────────
 function displaySongs() {
     songList.innerHTML = "";
     const q = searchInput.value.toLowerCase();
     songs.forEach((song, i) => {
-        if((currentGenre !== "All" && song.genre !== currentGenre)) return;
+        if(currentGenre !== "All" && song.genre !== currentGenre) return;
         if(!(song.name.toLowerCase().includes(q) || song.artist.toLowerCase().includes(q))) return;
 
         const div = document.createElement("div");
@@ -356,7 +700,6 @@ function displaySongs() {
 
         const left = document.createElement("div");
         left.style.overflow = "hidden";
-
         const nameRow = document.createElement("div");
         nameRow.classList.add("song-name");
         nameRow.innerText = song.name;
@@ -368,7 +711,6 @@ function displaySongs() {
         const sub = document.createElement("div");
         sub.classList.add("song-sub");
         sub.innerText = song.artist + " · " + song.genre;
-
         left.appendChild(nameRow);
         left.appendChild(sub);
 
@@ -384,7 +726,6 @@ function displaySongs() {
     });
 }
 
-// ── RENDER GENRES & LIKED ────────────────────────────────────────────
 function displayGenres() {
     genreChips.innerHTML = "";
     Object.keys(genreThemes).forEach(g => {
@@ -419,7 +760,6 @@ function displayGenres() {
     });
 }
 
-// ── AUDIO ANALYZER ───────────────────────────────────────────────────
 function setupAnalyzer() {
     if(audioContext) return;
     audioContext = new (window.AudioContext||window.webkitAudioContext)();
@@ -444,7 +784,6 @@ function animateBg() {
     if(!audio.paused) playPauseBtn.style.boxShadow = `0 0 ${20+intensity*40}px var(--accent)`;
 }
 
-// ── UI ───────────────────────────────────────────────────────────────
 function initUI(index) {
     currentSongIndex = index;
     const song = songs[index];
@@ -473,7 +812,6 @@ function setPlayingUI(playing) {
     if(!playing) playPauseBtn.style.boxShadow = "";
 }
 
-// ── PLAYBACK ─────────────────────────────────────────────────────────
 function loadAndPlay(i) {
     initUI(i);
     resumeCtx();
@@ -486,7 +824,6 @@ function loadAndPlay(i) {
 function nextSong() { loadAndPlay((currentSongIndex+1)%songs.length); }
 function prevSong() { loadAndPlay((currentSongIndex-1+songs.length)%songs.length); }
 
-// ── SEEK (touch + click) ─────────────────────────────────────────────
 function seekTo(clientX) {
     if(!audio.duration) return;
     const rect = progressCont.getBoundingClientRect();
@@ -497,7 +834,6 @@ progressCont.addEventListener("touchstart", e => { isSeeking=true; seekTo(e.touc
 document.addEventListener("touchmove",  e => { if(isSeeking) seekTo(e.touches[0].clientX); }, {passive:true});
 document.addEventListener("touchend",   () => isSeeking=false);
 
-// ── EVENTS ───────────────────────────────────────────────────────────
 audio.addEventListener("timeupdate", () => {
     if(!audio.duration||isSeeking) return;
     const pct = (audio.currentTime/audio.duration)*100;
@@ -505,9 +841,9 @@ audio.addEventListener("timeupdate", () => {
     miniProgress.style.width = pct+"%";
     timeDisplay.innerText = formatTime(audio.currentTime)+" / "+formatTime(audio.duration);
 });
-audio.addEventListener("ended", () => repeatMode===2 ? (audio.currentTime=0,audio.play()) : nextSong());
-audio.addEventListener("pause", () => setPlayingUI(false));
-audio.addEventListener("play",  () => setPlayingUI(true));
+audio.addEventListener("ended",  () => repeatMode===2 ? (audio.currentTime=0,audio.play()) : nextSong());
+audio.addEventListener("pause",  () => setPlayingUI(false));
+audio.addEventListener("play",   () => setPlayingUI(true));
 
 playPauseBtn.onclick = () => {
     resumeCtx(); if(!audioContext) setupAnalyzer();
@@ -526,6 +862,7 @@ repeatBtn.onclick = () => {
 };
 
 likeBtn.onclick = () => {
+    if(!getCurrentProfile()) return;
     const nowLiked = toggleLike(songs[currentSongIndex].file);
     updateLikeBtn(songs[currentSongIndex].file);
     displaySongs(); displayGenres();
@@ -539,21 +876,21 @@ nextBtn.onclick = nextSong;
 volumeSlider.oninput = () => audio.volume = volumeSlider.value/100;
 searchInput.addEventListener("input", displaySongs);
 
-// Desktop keyboard
 document.addEventListener("keydown", e => {
     if(document.activeElement.tagName==="INPUT") return;
     resumeCtx();
-    if(e.code==="Space")      { e.preventDefault(); playPauseBtn.onclick(); }
+    if(e.code==="Space")       { e.preventDefault(); playPauseBtn.onclick(); }
     else if(e.code==="ArrowRight") audio.currentTime+=5;
     else if(e.code==="ArrowLeft")  audio.currentTime-=5;
     else if(e.code==="ArrowUp")  { e.preventDefault(); audio.volume=Math.min(1,audio.volume+0.05); volumeSlider.value=audio.volume*100; }
     else if(e.code==="ArrowDown"){ e.preventDefault(); audio.volume=Math.max(0,audio.volume-0.05); volumeSlider.value=audio.volume*100; }
 });
 
-// ── INIT ─────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────
 displayGenres();
 displaySongs();
 initUI(0);
+initProfiles();
 </script>
 </body>
 </html>
